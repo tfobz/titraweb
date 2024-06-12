@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titrationsdiagramm</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #00bfa5 0%, #004d40 100%);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(0, 51, 51, 0.8);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 30px;
+            width: 80%;
+            max-width: 1200px;
+            height: 80vh;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease-in-out;
+            overflow-y: hidden;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+        }
+
+        .chart-container,
+        .values-container {
+            flex: 1;
+            text-align: center;
+        }
+
+        .card {
+            background: rgba(0, 51, 51, 0.6);
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, #00bfa5 0%, #004d40 100%);
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #fff;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            animation: pulse 1.5s infinite alternate ease-in-out;
+        }
+
+        .btn-custom i {
+            margin-right: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .btn-custom::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s;
+            border-radius: 50%;
+            z-index: 0;
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        .btn-custom:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .collapse {
+            transition: all 0.5s ease-in-out;
+        }
+
+        .collapse:not(.show) {
+            display: none !important;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        #titration-chart img {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .values-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            animation: slideIn 1s ease-in-out;
+        }
+
+        .values-row p {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+            margin: 0;
+            flex: 1 0 45%;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+ 
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="chart-container">
+            <h1>Titrationsdiagramm</h1>
+            <div id="titration-chart">
+                <img src="data:image/png;base64, {{ img_base64 }}" alt="Titrationsdiagramm" class="img-fluid">
+            </div>
+        </div>
+        <div class="values-container">
+            <button class="btn btn-custom mb-4" type="button" data-toggle="collapse" data-target="#valuesCollapse"
+                aria-expanded="false" aria-controls="valuesCollapse">
+                <i class="fas fa-chevron-down"></i> Werte anzeigen
+            </button>
+            <div class="collapse" id="valuesCollapse">
+                <div class="card card-body">
+                    <div id="values-container" class="values-row"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const button = document.querySelector('.btn-custom');
+            const valuesCollapse = document.getElementById('valuesCollapse');
+
+            button.addEventListener('click', () => {
+                if (valuesCollapse.classList.contains('show')) {
+                    valuesCollapse.classList.remove('show');
+                    document.getElementById('values-container').innerHTML = '';
+                } else {
+                    valuesCollapse.classList.add('show');
+                    fetchAndShowValues();
+                }
+            });
+        });
+
+        function fetchAndShowValues() {
+            fetch('/values')
+                .then(response => response.json())
+                .then(data => {
+                    const valuesContainer = document.getElementById('values-container');
+                    valuesContainer.innerHTML = '';
+                    for (const key in data) {
+                        if (Array.isArray(data[key])) {
+                            valuesContainer.innerHTML += `<p><strong>${key}:</strong> ${data[key].join(', ')}</p>`;
+                        } else {
+                            valuesContainer.innerHTML += `<p><strong>${key}:</strong> ${data[key]}</p>`;
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching values:', error));
+        }
+    </script>
+</body>
+
+</html>

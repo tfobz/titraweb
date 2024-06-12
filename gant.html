@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GANTT-Diagramm</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    canvas {
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div style="width: 800px; margin: 0 auto;">
+    <canvas id="ganttChart"></canvas>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('ganttChart').getContext('2d');
+    const ganttChart = new Chart(ctx, {
+      type: 'horizontalBar',
+      data: {
+        labels: ['Planung', 'Implementierung', 'Testphase', 'Dokumentation'],
+        datasets: [{
+          label: 'Zeitplan',
+          backgroundColor: 'rgba(54, 162, 235, 0.5)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+          data: [{
+            x: '2023-09-05',
+            y: '2023-09-15'
+          }, {
+            x: '2023-09-16',
+            y: '2023-12-15'
+          }, {
+            x: '2023-12-16',
+            y: '2024-03-15'
+          }, {
+            x: '2024-03-16',
+            y: '2024-05-24'
+          }]
+        }]
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            type: 'time',
+            time: {
+              unit: 'month'
+            },
+            ticks: {
+              min: '2023-09-01',
+              max: '2024-06-01'
+            },
+            scaleLabel: {
+              display: true,
+              labelString: 'Zeit'
+            }
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Aufgaben'
+            }
+          }]
+        },
+        tooltips: {
+          callbacks: {
+            title: function(tooltipItem, data) {
+              const title = data.labels[tooltipItem[0].index];
+              return title;
+            },
+            label: function(tooltipItem, data) {
+              const dataset = data.datasets[tooltipItem.datasetIndex];
+              const startTime = new Date(dataset.data[tooltipItem.index].x);
+              const endTime = new Date(dataset.data[tooltipItem.index].y);
+              return 'Start: ' + startTime.toLocaleDateString() + ' - Ende: ' + endTime.toLocaleDateString();
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        title: {
+          display: true,
+          text: 'GANTT-Diagramm zur Projektplanung'
+        }
+      }
+    });
+  </script>
+</body>
+</html>
